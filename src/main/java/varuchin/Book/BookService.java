@@ -11,7 +11,7 @@ import java.util.UUID;
 
 @Path("/books")
 @Produces(MediaType.APPLICATION_JSON)
-public class BookService
+public class  BookService
 {
 
     private IBookDAO dao;

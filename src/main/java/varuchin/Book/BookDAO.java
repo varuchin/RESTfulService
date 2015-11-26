@@ -10,7 +10,7 @@ public class BookDAO implements IBookDAO {
     private static Map<UUID, Book> books = new HashMap<>();
     private String user = "system";//Логин пользователя
     private String password = "oblivion";//Пароль пользователя
-    private String url = "jdbc:oracle:thin:@Lenovo-PC:1521:XE";//URL адрес
+    private String url = "jdbc:oracle:thin:n103934.merann.ru:1521:XE";//URL адрес
     private String driver = "oracle.jdbc.driver.OracleDriver";//Имя драйвера
     private Connection c = null;
 
@@ -32,6 +32,25 @@ public class BookDAO implements IBookDAO {
         }
     }
 
+    public void executeUpd(String sql)
+    {
+        try
+        {
+            c = DriverManager.getConnection(url, user, password);
+            System.out.println("Connected.");
+            c.createStatement().executeUpdate(sql);
+            c.commit();
+            c.close();
+
+        }
+
+        catch (SQLException e)
+        {
+            System.err.println(e.getMessage());
+        }
+
+    }
+
     @Override
     public Book getByUUID(UUID uuid)
     {
@@ -41,18 +60,10 @@ public class BookDAO implements IBookDAO {
     @Override
     public void remove(Book book)
     {
-        connect();
-        try
-        {
-            Statement st = c.createStatement();
-            st.executeUpdate("DELETE FROM LIBRARY WHERE NAME = "
-            + book.getName());
-        }
+        String sql = "DELETE FROM LIBRARY WHERE NAME = "
+                + book.getName();
+        executeUpd(sql);
 
-        catch (SQLException e)
-        {
-            e.printStackTrace();
-        }
         books.remove(book.getUuid());
     }
 
@@ -61,19 +72,14 @@ public class BookDAO implements IBookDAO {
     {
         if(book.getUuid().equals(null))
             book.setUuid(UUID.randomUUID());
-        connect();
-        try {
-            Statement st = c.createStatement();
-            st.executeUpdate("INSERT INTO LIBRARY VALUES " + book.getName()
-                    + ", " + book.getAuthor()
-                    + ", " + book.getPrice()
-                    + ", " + book.getStock());
 
-        }
-        catch (SQLException e)
-        {
-            e.printStackTrace();
-        }
+        String sql = "INSERT INTO LIBRARY VALUES " + book.getName()
+                + ", " + book.getAuthor()
+                + ", " + book.getPrice()
+                + ", " + book.getStock();
+
+        executeUpd(sql);
+
         books.put(book.getUuid(), book);
     }
 
@@ -91,6 +97,8 @@ public class BookDAO implements IBookDAO {
 
             while (rs.next())
                 result.add(author);
+            c.commit();
+            c.close();
         }
 
         catch (SQLException e)
