@@ -12,7 +12,7 @@ public interface IBookDAO {
      Book getByUUID(UUID uuid);
      void remove(Book book);
      void add(Book book);
-     HashSet<String> findByAuthor(String author);
+     HashSet<String> findByAuthor(String author);//перепси
      Collection<Book> getAll();
 
 }

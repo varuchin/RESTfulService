@@ -11,28 +11,24 @@ import java.util.UUID;
 
 @Path("/books")
 @Produces(MediaType.APPLICATION_JSON)
-public class  BookService
-{
+public class BookService {
 
     private IBookDAO dao;
 
-    public BookService()
-    {
+    public BookService() {
         dao = new BookDAO();
     }
 
     @GET
     @Path("/{uuid}")
-    public Book get(@PathParam("uuid") UUID uuid)
-    {
+    public Book get(@PathParam("uuid") UUID uuid) {
         return dao.getByUUID(uuid);
     }
 
     @POST
     @Path("/")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response add(Book book)
-    {
+    public Response add(Book book) {
         dao.add(book);
         URI location = URI.create("/books" + book.getUuid().toString());
         return Response.created(location).build();
@@ -41,8 +37,7 @@ public class  BookService
     @PUT
     @Path("/{uuid}")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response update(@PathParam("uuid") UUID uuid, Book book)
-    {
+    public Response update(@PathParam("uuid") UUID uuid, Book book) {
         Book originBook = dao.getByUUID(uuid);
         boolean isNewBook = originBook == null;
 
@@ -73,28 +68,26 @@ public class  BookService
             return Response.noContent().location(location).build();
 
     }
+
     @DELETE
     @Path("/{uuid}")
-    public Response remove(@PathParam("uuid") UUID uuid)
-        {
-            Book originBook = dao.getByUUID(uuid);
-            if(originBook.equals(null))
-                return Response.status(Response.Status.NOT_FOUND).build();
-                dao.remove(originBook);
-            return Response.noContent().build();
-        }
+    public Response remove(@PathParam("uuid") UUID uuid) {
+        Book originBook = dao.getByUUID(uuid);
+        if (originBook.equals(null))
+            return Response.status(Response.Status.NOT_FOUND).build();
+        dao.remove(originBook);
+        return Response.noContent().build();
+    }
 
-    @GET
-    public HashSet<String> findByAuthor(@QueryParam("AUTHOR") String author)
-    {
-        if(!dao.findByAuthor(author).equals(author))
+   // @GET
+    public HashSet<String> findByAuthor(@QueryParam("AUTHOR") String author) {
+        if (!dao.findByAuthor(author).equals(author))
             return null;
         return dao.findByAuthor(author);
     }
 
-    @GET
-    public Collection<Book> getAll()
-    {
+   // @GET
+    public Collection<Book> getAll() {
         return dao.getAll();
     }
 

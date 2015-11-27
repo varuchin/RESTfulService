@@ -4,7 +4,6 @@ import java.sql.*;
 import java.util.*;
 
 
-
 public class BookDAO implements IBookDAO {
 
     private static Map<UUID, Book> books = new HashMap<>();
@@ -14,9 +13,8 @@ public class BookDAO implements IBookDAO {
     private String driver = "oracle.jdbc.driver.OracleDriver";//Имя драйвера
     private Connection c = null;
 
-
-    public void connect()
-    {
+    //НАДО бы ПЕРЕПИСАТЬ НА ЕДИНЫЙ АПДЕЙТ
+    public void connect() {
         try {
             Class.forName(driver);//Регистрируем драйвер
         } catch (ClassNotFoundException e) {
@@ -32,45 +30,37 @@ public class BookDAO implements IBookDAO {
         }
     }
 
-    public void executeUpd(String sql)
-    {
-        try
-        {
+    public void executeUpd(String sql) {
+        try {
             c = DriverManager.getConnection(url, user, password);
             System.out.println("Connected.");
             c.createStatement().executeUpdate(sql);
             c.commit();
             c.close();
 
-        }
-
-        catch (SQLException e)
-        {
+        } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
 
     }
 
     @Override
-    public Book getByUUID(UUID uuid)
-    {
+    public Book getByUUID(UUID uuid) {
         return books.get(uuid);
     }
 
+    //переделать на prepare-statement
     @Override
-    public void remove(Book book)
-    {
+    public void remove(Book book) {
         String sql = "DELETE FROM LIBRARY WHERE NAME = "
                 + book.getName();
         executeUpd(sql);
-
         books.remove(book.getUuid());
     }
 
     @Override
-    public void add(Book book)
-    {
-        if(book.getUuid().equals(null))
+    public void add(Book book) {
+        if (book.getUuid().equals(null))
             book.setUuid(UUID.randomUUID());
 
         String sql = "INSERT INTO LIBRARY VALUES " + book.getName()
@@ -79,39 +69,33 @@ public class BookDAO implements IBookDAO {
                 + ", " + book.getStock();
 
         executeUpd(sql);
-
         books.put(book.getUuid(), book);
     }
 
-
+    //плохо
+    //вернуть collection<Book>
     @Override
-    public HashSet<String> findByAuthor(String author)
-    {
-       HashSet<String> result = new HashSet<>();
+    public HashSet<String> findByAuthor(String author) {
+        HashSet<String> result = new HashSet<>();
 
         connect();
-        try
-        {
+        try {
             Statement st = c.createStatement();
             ResultSet rs = st.executeQuery("SELECT * FROM LIBRARY WHERE AUTHOR = " + author);
 
             while (rs.next())
                 result.add(author);
-            c.commit();
             c.close();
-        }
-
-        catch (SQLException e)
-        {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
 
         return result;
     }
 
+    //переделать под дао с использованием бд
     @Override
-    public Collection<Book> getAll()
-    {
+    public Collection<Book> getAll() {
         return books.values();
     }
 }
