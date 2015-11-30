@@ -1,6 +1,6 @@
 package varuchin.Book;
 
-public class Book {
+public class Book extends Object {
 
 
     private Integer id;

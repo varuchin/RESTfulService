@@ -6,11 +6,9 @@ import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.UUID;
 
 
-@Path("/books")
+@Path(value="/books")
 @Produces(MediaType.APPLICATION_JSON)
 public class BookService {
 
@@ -21,22 +19,29 @@ public class BookService {
     }
 
     @GET
-    @Path("/{id}")
-    public String get(@PathParam("id") Integer id) throws SQLException {
+    @Path(value="/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Book get(@PathParam(value="id") Integer id) throws SQLException {
+
+        if (!dao.getByID(id).getId().equals(id)){
+            System.err.println("Not Found.");
+            return null;
+        }
+        System.err.println("Found.");
         return dao.getByID(id);
     }
 
     @POST
-    @Path("/")
+    @Path(value="/")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response add(Book book) throws SQLException {
         dao.add(book);
-        URI location = URI.create("/books" + book.getId().toString());
+        URI location = URI.create("/books" + book.getId());
         return Response.created(location).build();
     }
 
     @PUT
-    @Path("/{id}")
+    @Path(value="/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response update(@PathParam("id") Integer id, Book book) throws SQLException {
         Book originBook = new Book();
@@ -70,7 +75,7 @@ public class BookService {
     }
 //думать
     @DELETE
-    @Path("/{id}")
+    @Path(value="/{id}")
     public Response remove(@PathParam("id") int id) throws SQLException {
         Book originBook = new Book();
         originBook.setId(id);
@@ -82,14 +87,23 @@ public class BookService {
     }
 
     @GET
-    public Collection<String> findByAuthor(@QueryParam("AUTHOR") String author) throws SQLException {
-        if (!dao.findByAuthor(author).equals(author))
-            return null;
+    @Path(value="/authors")
+    public Collection<Book> getAuthors() throws  SQLException {
+        return dao.getAllAuthors();
+    }
+
+    @GET
+    @Path(value="/authors/{author}")
+    public Collection<Book> findByAuthor (String author) throws SQLException {
+        if (!dao.findByAuthor(author).equals(author)) {
+            System.err.println("Not found.");
+            return null; }
+        System.err.println(author + " is in the base.");
         return dao.findByAuthor(author);
     }
 
     @GET
-    public Collection<String> getAll() throws SQLException {
+    public Collection<Book> getAll() throws SQLException {
         return dao.getAll();
     }
 
