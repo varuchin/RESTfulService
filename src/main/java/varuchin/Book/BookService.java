@@ -4,6 +4,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.net.URI;
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.UUID;
@@ -20,30 +21,29 @@ public class BookService {
     }
 
     @GET
-    @Path("/{uuid}")
-    public Book get(@PathParam("uuid") UUID uuid) {
-        return dao.getByUUID(uuid);
+    @Path("/{id}")
+    public String get(@PathParam("id") Integer id) throws SQLException {
+        return dao.getByID(id);
     }
 
     @POST
     @Path("/")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response add(Book book) {
+    public Response add(Book book) throws SQLException {
         dao.add(book);
-        URI location = URI.create("/books" + book.getUuid().toString());
+        URI location = URI.create("/books" + book.getId().toString());
         return Response.created(location).build();
     }
 
     @PUT
-    @Path("/{uuid}")
+    @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response update(@PathParam("uuid") UUID uuid, Book book) {
-        Book originBook = dao.getByUUID(uuid);
-        boolean isNewBook = originBook == null;
+    public Response update(@PathParam("id") Integer id, Book book) throws SQLException {
+        Book originBook = new Book();
+        boolean isNewBook = dao.getByID(id) == null;
 
         if (isNewBook) {
-            originBook = new Book();
-            originBook.setUuid(uuid);
+            originBook.setId(id);
         }
 
         originBook.setName(book.getName());
@@ -55,9 +55,9 @@ public class BookService {
 
         StringBuilder builder = new StringBuilder();
         String path = "/books/";
-        String bookUUID = book.getUuid().toString();
+        String bookID = book.getId().toString();
         builder.append(path);
-        builder.append(bookUUID);
+        builder.append(bookID);
         String loc = builder.toString();
 
         URI location = URI.create(loc);
@@ -68,26 +68,28 @@ public class BookService {
             return Response.noContent().location(location).build();
 
     }
-
+//думать
     @DELETE
-    @Path("/{uuid}")
-    public Response remove(@PathParam("uuid") UUID uuid) {
-        Book originBook = dao.getByUUID(uuid);
+    @Path("/{id}")
+    public Response remove(@PathParam("id") int id) throws SQLException {
+        Book originBook = new Book();
+        originBook.setId(id);
+                //dao.getByID(id);
         if (originBook.equals(null))
             return Response.status(Response.Status.NOT_FOUND).build();
         dao.remove(originBook);
         return Response.noContent().build();
     }
 
-   // @GET
-    public HashSet<String> findByAuthor(@QueryParam("AUTHOR") String author) {
+    @GET
+    public Collection<String> findByAuthor(@QueryParam("AUTHOR") String author) throws SQLException {
         if (!dao.findByAuthor(author).equals(author))
             return null;
         return dao.findByAuthor(author);
     }
 
-   // @GET
-    public Collection<Book> getAll() {
+    @GET
+    public Collection<String> getAll() throws SQLException {
         return dao.getAll();
     }
 

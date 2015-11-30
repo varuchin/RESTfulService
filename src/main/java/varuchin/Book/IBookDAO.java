@@ -1,5 +1,6 @@
 package varuchin.Book;
 
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.UUID;
@@ -9,10 +10,10 @@ import java.util.UUID;
 public interface IBookDAO {
 
 
-     Book getByUUID(UUID uuid);
-     void remove(Book book);
-     void add(Book book);
-     HashSet<String> findByAuthor(String author);//перепси
-     Collection<Book> getAll();
+     String getByID(Integer id) throws SQLException;
+     void remove(Book book) throws SQLException;
+     void add(Book book) throws SQLException;
+     Collection<String> findByAuthor(String author) throws SQLException;
+     Collection<String> getAll() throws SQLException;
 
 }

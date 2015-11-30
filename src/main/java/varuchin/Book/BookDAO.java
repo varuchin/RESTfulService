@@ -1,28 +1,25 @@
 package varuchin.Book;
 
+import java.security.cert.CollectionCertStoreParameters;
 import java.sql.*;
 import java.util.*;
 
 
 public class BookDAO implements IBookDAO {
 
-    private static Map<UUID, Book> books = new HashMap<>();
+    //private static Map<UUID, Book> books = new HashMap<>();
     private String user = "system";//Логин пользователя
     private String password = "oblivion";//Пароль пользователя
     private String url = "jdbc:oracle:thin:n103934.merann.ru:1521:XE";//URL адрес
-    private String driver = "oracle.jdbc.driver.OracleDriver";//Имя драйвера
     private Connection c = null;
 
-    //НАДО бы ПЕРЕПИСАТЬ НА ЕДИНЫЙ АПДЕЙТ
+    public BookDAO() {
+    }
+
+    ;
+
     public void connect() {
         try {
-            Class.forName(driver);//Регистрируем драйвер
-        } catch (ClassNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
-        try {
             c = DriverManager.getConnection(url, user, password);
             System.out.println("Connected.");
         } catch (SQLException e) {
@@ -30,72 +27,128 @@ public class BookDAO implements IBookDAO {
         }
     }
 
-    public void executeUpd(String sql) {
-        try {
-            c = DriverManager.getConnection(url, user, password);
-            System.out.println("Connected.");
-            c.createStatement().executeUpdate(sql);
-            c.commit();
-            c.close();
-
-        } catch (SQLException e) {
-            System.err.println(e.getMessage());
-        }
-
-    }
-
+    //написать
     @Override
-    public Book getByUUID(UUID uuid) {
-        return books.get(uuid);
-    }
-
-    //переделать на prepare-statement
-    @Override
-    public void remove(Book book) {
-        String sql = "DELETE FROM LIBRARY WHERE NAME = "
-                + book.getName();
-        executeUpd(sql);
-        books.remove(book.getUuid());
-    }
-
-    @Override
-    public void add(Book book) {
-        if (book.getUuid().equals(null))
-            book.setUuid(UUID.randomUUID());
-
-        String sql = "INSERT INTO LIBRARY VALUES " + book.getName()
-                + ", " + book.getAuthor()
-                + ", " + book.getPrice()
-                + ", " + book.getStock();
-
-        executeUpd(sql);
-        books.put(book.getUuid(), book);
-    }
-
-    //плохо
-    //вернуть collection<Book>
-    @Override
-    public HashSet<String> findByAuthor(String author) {
-        HashSet<String> result = new HashSet<>();
+    public String getByID(Integer id) throws SQLException {
+        PreparedStatement st;
+        StringBuilder book = new StringBuilder();
+        String result;
 
         connect();
         try {
-            Statement st = c.createStatement();
-            ResultSet rs = st.executeQuery("SELECT * FROM LIBRARY WHERE AUTHOR = " + author);
+            st = c.prepareStatement("SELECT * FROM LIBRARY WHERE ID = ?");
+            st.setInt(1, id);
+            ResultSet rs = st.executeQuery();
+
+            while (rs.next()) {
+                book.append(rs.getString("ID") + " ");
+                book.append(rs.getString("NAME") + " ");
+                book.append(rs.getString("AUTHOR") + " ");
+                book.append(rs.getString("PRICE") + " ");
+                book.append(rs.getString("STOCK") + " ");
+            }
+
+        } catch (SQLException e) {
+        } finally {
+            c.close();
+        }
+        result = book.toString();
+        return result;
+    }
+
+
+    @Override
+    public void remove(Book book) throws SQLException {
+        connect();
+        PreparedStatement st;
+        try {
+            st = c.prepareStatement("DELETE FROM LIBRARY WHERE ID = ?");
+            st.setInt(1, book.getId());
+            st.executeUpdate();
+            c.commit();
+
+        } catch (SQLException e) {
+        } finally {
+            c.close();
+        }
+    }
+
+    @Override
+    public void add(Book book) throws SQLException {
+        PreparedStatement st;
+        connect();
+        try {
+            st = c.prepareStatement("INSERT INTO LIBRARY VALUES ?");
+            String value = book.getId()
+                    + ", " + book.getName()
+                    + ", " + book.getAuthor()
+                    + ", " + book.getPrice()
+                    + ", " + book.getStock();
+
+            st.setString(1, value);
+            st.executeUpdate();
+            c.commit();
+        } catch (SQLException e) {
+        } finally {
+
+            c.close();
+        }
+    }
+
+    //плохо
+    //вернуть collection
+    @Override
+    public Collection<String> findByAuthor(String author) throws SQLException {
+        int count;
+        Collection<String> result = new ArrayList<>();
+
+        connect();
+        try {
+            PreparedStatement st = c.prepareStatement("SELECT * FROM LIBRARY WHERE AUTHOR = ?");
+            st.setString(1, author);
+            ResultSet rs = st.executeQuery();
+
+            ResultSetMetaData metaData = rs.getMetaData();
+            count = metaData.getColumnCount();
 
             while (rs.next())
-                result.add(author);
-            c.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+                for (int i = 0; i < count; i++)
+                    result.add(rs.getString("NAME"));
 
+        } catch (SQLException e) {
+        } finally {
+            c.close();
+        }
         return result;
     }
 
     //переделать под дао с использованием бд
     @Override
-    public Collection<Book> getAll() {
-        return books.values();
+    public Collection<String> getAll() throws SQLException {
+        PreparedStatement st;
+        Collection<String> result = new ArrayList<>();
+
+        connect();
+        try {
+            st = c.prepareStatement("SELECT * FROM LIBRARY");
+            ResultSet rs = st.executeQuery();
+
+            while (rs.next()) {
+                StringBuilder builder = new StringBuilder();
+                builder.append(rs.getString("ID").concat(" "));
+                builder.append(rs.getString("NAME").concat(" "));
+                builder.append(rs.getString("AUTHOR").concat(" "));
+                builder.append(rs.getString("PRICE").concat(" "));
+                builder.append(rs.getString("STOCK").concat(" "));
+                String book = builder.toString();
+                result.add(book);
+            }
+
+        } catch (SQLException e) {
+        } finally {
+            c.close();
+        }
+
+        return result;
     }
 }

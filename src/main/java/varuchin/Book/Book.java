@@ -1,11 +1,9 @@
 package varuchin.Book;
 
-import java.util.UUID;
-
 public class Book {
 
-    private UUID uuid;
-    private int id;
+
+    private Integer id;
     private String name;
     private String author;
     private String price;
@@ -14,15 +12,8 @@ public class Book {
     public Book() {
     }
 
-    public UUID getUuid() {
-        return uuid;
-    }
 
-    public void setUuid(UUID uuid) {
-        this.uuid = uuid;
-    }
-
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
