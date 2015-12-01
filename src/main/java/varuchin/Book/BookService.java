@@ -6,9 +6,10 @@ import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.UUID;
 
 
-@Path(value="/books")
+@Path(value = "/books")
 @Produces(MediaType.APPLICATION_JSON)
 public class BookService {
 
@@ -19,11 +20,11 @@ public class BookService {
     }
 
     @GET
-    @Path(value="/{id}")
+    @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Book get(@PathParam(value="id") Integer id) throws SQLException {
+    public Book get(@PathParam("id") UUID id) throws SQLException {
 
-        if (!dao.getByID(id).getId().equals(id)){
+        if (!dao.getByID(id).getId().equals(id)) {
             System.err.println("Not Found.");
             return null;
         }
@@ -32,20 +33,25 @@ public class BookService {
     }
 
     @POST
-    @Path(value="/")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response add(Book book) throws SQLException {
         dao.add(book);
         URI location = URI.create("/books" + book.getId());
+        System.out.println(location.toString());
         return Response.created(location).build();
     }
 
+
     @PUT
-    @Path(value="/{id}")
+    @Path(value = "/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response update(@PathParam("id") Integer id, Book book) throws SQLException {
+    public Response update(@PathParam("id") UUID id, Book book) throws SQLException {
         Book originBook = new Book();
-        boolean isNewBook = dao.getByID(id) == null;
+        boolean isNewBook;
+
+        if (dao.getByID(id) == null)
+            isNewBook = true;
+        else isNewBook = false;
 
         if (isNewBook) {
             originBook.setId(id);
@@ -73,39 +79,48 @@ public class BookService {
             return Response.noContent().location(location).build();
 
     }
-//думать
+
+    //думать
     @DELETE
-    @Path(value="/{id}")
-    public Response remove(@PathParam("id") int id) throws SQLException {
+    @Path(value = "/{id}")
+    public Response remove(@PathParam("id") UUID id) throws SQLException {
         Book originBook = new Book();
         originBook.setId(id);
-                //dao.getByID(id);
+        //dao.getByID(id);
         if (originBook.equals(null))
             return Response.status(Response.Status.NOT_FOUND).build();
         dao.remove(originBook);
         return Response.noContent().build();
     }
 
+
     @GET
-    @Path(value="/authors")
-    public Collection<Book> getAuthors() throws  SQLException {
+    @Path(value = "/names")
+    public Collection<Book> getNames() throws SQLException {
+        return dao.getAllNames();
+    }
+
+    @GET
+    @Path(value = "/authors")
+    public Collection<Book> getAuthors() throws SQLException {
         return dao.getAllAuthors();
     }
 
     @GET
-    @Path(value="/authors/{author}")
-    public Collection<Book> findByAuthor (String author) throws SQLException {
-        if (!dao.findByAuthor(author).equals(author)) {
-            System.err.println("Not found.");
-            return null; }
-        System.err.println(author + " is in the base.");
-        return dao.findByAuthor(author);
+    @Path(value = "/prices")
+    public Collection<Book> getPrices() throws SQLException {
+        return dao.getAllPrices();
     }
+
+    @GET
+    @Path(value = "/stocks")
+    public Collection<Book> getStocks() throws SQLException {
+        return dao.getAllStocks();
+    }
+
 
     @GET
     public Collection<Book> getAll() throws SQLException {
         return dao.getAll();
     }
-
-
 }

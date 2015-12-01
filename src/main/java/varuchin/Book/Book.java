@@ -1,9 +1,11 @@
 package varuchin.Book;
 
-public class Book extends Object {
+import java.util.UUID;
+
+public class Book {
 
 
-    private Integer id;
+    private UUID id;
     private String name;
     private String author;
     private String price;
@@ -13,11 +15,11 @@ public class Book extends Object {
     }
 
 
-    public Integer getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
@@ -53,42 +55,5 @@ public class Book extends Object {
         this.stock = stock;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Book book = (Book) o;
-
-        if (getId() != book.getId()) return false;
-        if (!getName().equals(book.getName())) return false;
-        if (getAuthor() != null ? !getAuthor().equals(book.getAuthor()) : book.getAuthor() != null) return false;
-        if (getPrice() != null ? !getPrice().equals(book.getPrice()) : book.getPrice() != null) return false;
-        return !(getStock() != null ? !getStock().equals(book.getStock()) : book.getStock() != null);
-
-    }
-
-
-    @Override
-    public int hashCode() {
-        int result = getId();
-        result = 31 * result + getName().hashCode();
-        result = 31 * result + (getAuthor() != null ? getAuthor().hashCode() : 0);
-        result = 31 * result + (getPrice() != null ? getPrice().hashCode() : 0);
-        result = 31 * result + (getStock() != null ? getStock().hashCode() : 0);
-        return result;
-
-    }
-
-    @Override
-    public String toString() {
-        return "Book{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", author='" + author + '\'' +
-                ", price='" + price + '\'' +
-                ", stock='" + stock + '\'' +
-                '}';
-    }
 
 }
