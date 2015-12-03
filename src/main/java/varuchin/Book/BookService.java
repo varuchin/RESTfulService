@@ -9,7 +9,7 @@ import java.util.Collection;
 import java.util.UUID;
 
 
-@Path(value = "/books")
+@Path(value = "/")
 @Produces(MediaType.APPLICATION_JSON)
 public class BookService {
 
@@ -20,7 +20,7 @@ public class BookService {
     }
 
     @GET
-    @Path("/{id}")
+    @Path("/books/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public Book get(@PathParam("id") UUID id) throws SQLException {
 
@@ -35,6 +35,7 @@ public class BookService {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     public Response add(Book book) throws SQLException {
+        System.err.println("Working");
         dao.add(book);
         URI location = URI.create("/books" + book.getId());
         System.out.println(location.toString());
@@ -43,27 +44,49 @@ public class BookService {
 
 
     @PUT
-    @Path(value = "/{id}")
+    @Path(value = "/books/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response update(@PathParam("id") UUID id, Book book) throws SQLException {
+    public Response update(@PathParam("id") String id, Book book) throws SQLException {
+        System.err.println("Started");
         Book originBook = new Book();
         boolean isNewBook;
 
-        if (dao.getByID(id) == null)
-            isNewBook = true;
-        else isNewBook = false;
+        boolean a = dao.getByID(UUID.fromString(id))==null;
+        System.out.println("--------------");
+        System.out.println(a);
+        System.out.println("--------------");
 
-        if (isNewBook) {
-            originBook.setId(id);
+
+        if (dao.getByID(UUID.fromString(id))==null) {
+            System.err.println("id");
+            System.err.println("True");
+            isNewBook = true;
+        }
+        else {
+            System.err.println(id);
+            System.err.println("False");
+            isNewBook = false;
         }
 
+        if (isNewBook) {
+            originBook.setId(UUID.randomUUID());
+        }
+        else {
+            originBook.setId(UUID.fromString(id));
+        }
+
+        System.err.println("OK");
+        System.out.println(book);
         originBook.setName(book.getName());
         originBook.setAuthor(book.getAuthor());
         originBook.setPrice(book.getPrice());
         originBook.setStock(book.getStock());
 
-        dao.add(originBook);
+        System.out.println(originBook);
 
+        dao.updateBook(originBook);
+
+        System.err.println("Added");
         StringBuilder builder = new StringBuilder();
         String path = "/books/";
         String bookID = book.getId().toString();
@@ -82,7 +105,7 @@ public class BookService {
 
     //думать
     @DELETE
-    @Path(value = "/{id}")
+    @Path(value = "/books/{id}")
     public Response remove(@PathParam("id") UUID id) throws SQLException {
         Book originBook = new Book();
         originBook.setId(id);
@@ -93,27 +116,32 @@ public class BookService {
         return Response.noContent().build();
     }
 
+    @GET
+    @Path("/books")
+    public Collection<Book> getByString(@QueryParam("string") String string) throws SQLException{
+        return dao.getByString(string);
+    }
 
     @GET
-    @Path(value = "/names")
+    @Path(value = "/books/names")
     public Collection<Book> getNames() throws SQLException {
         return dao.getAllNames();
     }
 
     @GET
-    @Path(value = "/authors")
+    @Path(value = "/books/authors")
     public Collection<Book> getAuthors() throws SQLException {
         return dao.getAllAuthors();
     }
 
     @GET
-    @Path(value = "/prices")
+    @Path(value = "/books/prices")
     public Collection<Book> getPrices() throws SQLException {
         return dao.getAllPrices();
     }
 
     @GET
-    @Path(value = "/stocks")
+    @Path(value = "/books/stocks")
     public Collection<Book> getStocks() throws SQLException {
         return dao.getAllStocks();
     }

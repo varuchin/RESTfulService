@@ -7,8 +7,6 @@ import java.util.UUID;
 
 public interface IBookDAO {
 
-//get с параметром (фильтр по имени (содержит строку like sql))
-
 
     Book getByID(UUID id) throws SQLException;
 
@@ -16,7 +14,9 @@ public interface IBookDAO {
 
     void add(Book book) throws SQLException;
 
-    Book updateBook(Book book) throws SQLException;
+    void updateBook(Book book) throws SQLException;
+
+    Collection<Book> getByString(String string) throws SQLException;
 
     Collection<Book> getAll() throws SQLException;
 
