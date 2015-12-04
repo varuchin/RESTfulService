@@ -9,7 +9,7 @@ import java.util.Collection;
 import java.util.UUID;
 
 
-@Path(value = "/")
+@Path(value = "/books")
 @Produces(MediaType.APPLICATION_JSON)
 public class BookService {
 
@@ -20,7 +20,7 @@ public class BookService {
     }
 
     @GET
-    @Path("/books/{id}")
+    @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public Book get(@PathParam("id") UUID id) throws SQLException {
 
@@ -44,29 +44,21 @@ public class BookService {
 
 
     @PUT
-    @Path(value = "/books/{id}")
+    @Path(value = "/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response update(@PathParam("id") String id, Book book) throws SQLException {
         System.err.println("Started");
         Book originBook = new Book();
         boolean isNewBook;
 
-        boolean a = dao.getByID(UUID.fromString(id))==null;
-        System.out.println("--------------");
-        System.out.println(a);
-        System.out.println("--------------");
 
 
-        if (dao.getByID(UUID.fromString(id))==null) {
-            System.err.println("id");
-            System.err.println("True");
+        if (dao.getByID(UUID.fromString(id))==null)
             isNewBook = true;
-        }
-        else {
-            System.err.println(id);
-            System.err.println("False");
+
+        else
             isNewBook = false;
-        }
+
 
         if (isNewBook) {
             originBook.setId(UUID.randomUUID());
@@ -105,7 +97,7 @@ public class BookService {
 
     //думать
     @DELETE
-    @Path(value = "/books/{id}")
+    @Path(value = "/{id}")
     public Response remove(@PathParam("id") UUID id) throws SQLException {
         Book originBook = new Book();
         originBook.setId(id);
@@ -123,31 +115,32 @@ public class BookService {
     }
 
     @GET
-    @Path(value = "/books/names")
+    @Path(value = "/names")
     public Collection<Book> getNames() throws SQLException {
         return dao.getAllNames();
     }
 
     @GET
-    @Path(value = "/books/authors")
+    @Path(value = "/authors")
     public Collection<Book> getAuthors() throws SQLException {
         return dao.getAllAuthors();
     }
 
     @GET
-    @Path(value = "/books/prices")
+    @Path(value = "/prices")
     public Collection<Book> getPrices() throws SQLException {
         return dao.getAllPrices();
     }
 
     @GET
-    @Path(value = "/books/stocks")
+    @Path(value = "/stocks")
     public Collection<Book> getStocks() throws SQLException {
         return dao.getAllStocks();
     }
 
 
     @GET
+    @Path("/all")
     public Collection<Book> getAll() throws SQLException {
         return dao.getAll();
     }

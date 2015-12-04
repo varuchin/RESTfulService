@@ -10,7 +10,7 @@ public class BookDAO implements IBookDAO {
     private static final String user = "system";//Логин пользователя
     private static final String password = "oblivion";//Пароль пользователя
     private static final String url = "jdbc:oracle:thin:@n103934.merann.ru:1521:XE";//URL адрес
-    private static Connection c = null;
+    private static Connection connection = null;
     private static Map<UUID, Book> books = new HashMap<>();
 
     public BookDAO() {
@@ -21,8 +21,8 @@ public class BookDAO implements IBookDAO {
         PreparedStatement st;
         Book book;
         UUID uuid;
-        String insertion = "INSERT INTO LIBRARY VALUES (? , ? , ? , ? , ?)";
-        st = c.prepareStatement(insertion);
+        String insertion = "INSERT INTO LIBRARY VALUES (?, ? , ? , ? , ?)";
+        st = connection.prepareStatement(insertion);
 
         book = new Book("Head First Java", "Kathy Sierra", "1000", "Moscow");
         uuid = UUID.randomUUID();
@@ -33,11 +33,10 @@ public class BookDAO implements IBookDAO {
         st.setString(5, "Moscow");
         books.put(uuid, book);
 
-
         st.executeUpdate();
 
         book = new Book("Thinking in Java", "Bruce Eckel", "1500", "Moscow");
-        st = c.prepareStatement(insertion);
+        st = connection.prepareStatement(insertion);
         uuid = UUID.randomUUID();
         st.setString(1, uuid.toString());
         st.setString(2, "Thinking in Java");
@@ -50,7 +49,7 @@ public class BookDAO implements IBookDAO {
 
         book = new Book("A Programmer's guide to Java",
                 "Khalid Azi, Mughal", "800", "Nizhny Novgorod");
-        st = c.prepareStatement(insertion);
+        st = connection.prepareStatement(insertion);
         uuid = UUID.randomUUID();
         st.setString(1, uuid.toString());
         st.setString(2, "A Programmer's guide to Java");
@@ -63,7 +62,7 @@ public class BookDAO implements IBookDAO {
 
         book = new Book("The pragmatic Programmer","Andrew Hunt","1000",
                 "Saint Petersburg");
-        st = c.prepareStatement(insertion);
+        st = connection.prepareStatement(insertion);
         uuid = UUID.randomUUID();
         st.setString(1, uuid.toString());
         st.setString(2, "The pragmatic Programmer");
@@ -75,7 +74,7 @@ public class BookDAO implements IBookDAO {
         st.executeUpdate();
 
         book = new Book("The elements of Java style", "Scott Amber", "1300", "Moscow");
-        st = c.prepareStatement(insertion);
+        st = connection.prepareStatement(insertion);
         uuid = UUID.randomUUID();
         st.setString(1, uuid.toString());
         st.setString(2, "The elements of Java style");
@@ -87,7 +86,7 @@ public class BookDAO implements IBookDAO {
         st.executeUpdate();
 
         book = new Book("Effective Java", "Joshua Bloch", "1700", "Nizhny Novgorod");
-        st = c.prepareStatement(insertion);
+        st = connection.prepareStatement(insertion);
         uuid = UUID.randomUUID();
         st.setString(1, uuid.toString());
         st.setString(2, "Effective Java");
@@ -99,7 +98,7 @@ public class BookDAO implements IBookDAO {
         st.executeUpdate();
 
         book = new Book("Bitter Java", "Bruce Tate", "700", "Saint Petersburg");
-        st = c.prepareStatement(insertion);
+        st = connection.prepareStatement(insertion);
         uuid = UUID.randomUUID();
         st.setString(1, uuid.toString());
         st.setString(2, "Bitter Java");
@@ -111,7 +110,7 @@ public class BookDAO implements IBookDAO {
         st.executeUpdate();
 
         book = new Book("Head first Design Patterns", "Eric Freeman", "1000", "Moscow");
-        st = c.prepareStatement(insertion);
+        st = connection.prepareStatement(insertion);
         uuid = UUID.randomUUID();
         st.setString(1, uuid.toString());
         st.setString(2, "Head first Design Patterns");
@@ -123,7 +122,7 @@ public class BookDAO implements IBookDAO {
         st.executeUpdate();
 
         book = new Book("The Java language specification", "Sun", "500", "Saint Petersburg");
-        st = c.prepareStatement(insertion);
+        st = connection.prepareStatement(insertion);
         uuid = UUID.randomUUID();
         st.setString(1, uuid.toString());
         st.setString(2, "The Java language specification");
@@ -135,7 +134,7 @@ public class BookDAO implements IBookDAO {
         st.executeUpdate();
 
         book = new Book("Clean code", "Robert C. Martin", "1200", "Moscow");
-        st = c.prepareStatement(insertion);
+        st = connection.prepareStatement(insertion);
         uuid = UUID.randomUUID();
         st.setString(1, uuid.toString());
         st.setString(2, "Clean code");
@@ -146,12 +145,12 @@ public class BookDAO implements IBookDAO {
 
         st.executeUpdate();
 
-        c.commit();
+        connection.commit();
 
     }
 
     public static void createTable() throws SQLException {
-        c = DriverManager.getConnection(url, user, password);
+        connection = DriverManager.getConnection(url, user, password);
         PreparedStatement st;
 
         String tableQuery = "CREATE TABLE LIBRARY (ID VARCHAR(100) NOT NULL, " +
@@ -160,12 +159,12 @@ public class BookDAO implements IBookDAO {
                 "PRICE NUMBER(30,2), " +
                 "STOCK VARCHAR(30))";
 
-        st = c.prepareStatement(tableQuery);
+        st = connection.prepareStatement(tableQuery);
         st.executeUpdate();
         insertValues();
 
         /**
-         st = c.prepareStatement("CREATE TABLE LIBRARY (? VARCHAR(10) NOT NULL, " +
+         st = connection.prepareStatement("CREATE TABLE LIBRARY (? VARCHAR(10) NOT NULL, " +
          "? VARCHAR(50) NOT NULL, " +
          "? VARCHAR(30)," +
          "? NUMBER(30,2)," +
@@ -180,14 +179,14 @@ public class BookDAO implements IBookDAO {
         //st.executeUpdate();
 
         System.err.println(books);
-        c.commit();
-        c.close();
+        connection.commit();
+        connection.close();
     }
 
 
     public void connect() {
         try {
-            c = DriverManager.getConnection(url, user, password);
+            connection = DriverManager.getConnection(url, user, password);
             System.out.println("Connected.");
         } catch (SQLException e) {
             e.printStackTrace();
@@ -204,7 +203,7 @@ public class BookDAO implements IBookDAO {
         Book result = null;
         connect();
         try {
-            st = c.prepareStatement("SELECT * FROM LIBRARY WHERE ID = ?");
+            st = connection.prepareStatement("SELECT * FROM LIBRARY WHERE ID = ?");
 
             st.setString(1, id.toString());
             System.out.println("////////////////");
@@ -226,7 +225,7 @@ public class BookDAO implements IBookDAO {
 
         } catch (SQLException e) {
         } finally {
-            c.close();
+            connection.close();
         }
 
         return result;
@@ -238,30 +237,31 @@ public class BookDAO implements IBookDAO {
         connect();
         PreparedStatement st;
         try {
-            st = c.prepareStatement("DELETE FROM LIBRARY WHERE ID = ?");
+            st = connection.prepareStatement("DELETE FROM LIBRARY WHERE ID = ?");
             st.setString(1, book.getId().toString());
             st.executeUpdate();
-            c.commit();
+            connection.commit();
 
         } catch (SQLException e) {
         } finally {
-            c.close();
+            connection.close();
         }
     }
-
+//написать в один statement
+    //id — number (java:long)
     @Override
     public void updateBook(Book book) throws SQLException {
 
         connect();
 
         PreparedStatement name =
-                c.prepareStatement("UPDATE LIBRARY SET NAME = ? WHERE ID = ?");
+                connection.prepareStatement("UPDATE LIBRARY SET NAME = ? WHERE ID = ?");
         PreparedStatement author =
-                c.prepareStatement("UPDATE LIBRARY SET AUTHOR = ? WHERE ID = ?");
+                connection.prepareStatement("UPDATE LIBRARY SET AUTHOR = ? WHERE ID = ?");
         PreparedStatement price =
-                c.prepareStatement("UPDATE LIBRARY SET PRICE = ? WHERE ID = ?");
+                connection.prepareStatement("UPDATE LIBRARY SET PRICE = ? WHERE ID = ?");
         PreparedStatement stock =
-                c.prepareStatement("UPDATE LIBRARY SET STOCK = ? WHERE ID = ?");
+                connection.prepareStatement("UPDATE LIBRARY SET STOCK = ? WHERE ID = ?");
 
 
         if (!book.equals(null)) {
@@ -286,10 +286,10 @@ public class BookDAO implements IBookDAO {
                 stock.setString(2, book.getId().toString());
                 stock.executeUpdate();
             }
-            c.commit();
-            c.close();
+            connection.commit();
+            connection.close();
         } else {
-            c.close();
+            connection.close();
         }
     }
 
@@ -301,7 +301,7 @@ public class BookDAO implements IBookDAO {
 
         book.setId(UUID.randomUUID());
         try {
-            st = c.prepareStatement("INSERT INTO LIBRARY VALUES (? , ? , ? , ?, ?)");
+            st = connection.prepareStatement("INSERT INTO LIBRARY VALUES (? , ? , ? , ?, ?)");
 
             st.setString(1, book.getId().toString());
             st.setString(2, book.getName());
@@ -310,12 +310,12 @@ public class BookDAO implements IBookDAO {
             st.setString(5, book.getStock());
 
             st.executeUpdate();
-            c.commit();
+            connection.commit();
 
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            c.close();
+            connection.close();
         }
     }
 
@@ -327,7 +327,8 @@ public class BookDAO implements IBookDAO {
 
         connect();
         try {
-            st = c.prepareStatement("SELECT * FROM LIBRARY");
+            st = connection.prepareStatement("SELECT * FROM LIBRARY");
+
 
 
             ResultSet rs = st.executeQuery();
@@ -345,7 +346,7 @@ public class BookDAO implements IBookDAO {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            c.close();
+            connection.close();
         }
         return result;
     }
@@ -357,10 +358,10 @@ public class BookDAO implements IBookDAO {
         connect();
 
         try{
-            StringBuilder builder = new StringBuilder("%".concat(string).concat("%"));
-
-            st = c.prepareStatement("SELECT * FROM LIBRARY WHERE NAME LIKE ?");
-            st.setString(1, builder.toString());
+            //StringBuilder builder = new StringBuilder("%"+string+"%");
+            String temp = "%"+string+"%";
+            st = connection.prepareStatement("SELECT * FROM LIBRARY WHERE NAME LIKE ?");
+            st.setString(1, temp);
             ResultSet rs = st.executeQuery();
             while(rs.next()){
                 Book book = new Book();
@@ -377,7 +378,7 @@ public class BookDAO implements IBookDAO {
         }
 
         finally {
-            c.close();
+            connection.close();
         }
 
         return result;
@@ -389,7 +390,7 @@ public class BookDAO implements IBookDAO {
         connect();
 
         try {
-            st = c.prepareStatement("SELECT AUTHOR FROM LIBRARY");
+            st = connection.prepareStatement("SELECT AUTHOR FROM LIBRARY");
             ResultSet rs = st.executeQuery();
 
             while (rs.next()) {
@@ -400,7 +401,7 @@ public class BookDAO implements IBookDAO {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            c.close();
+            connection.close();
         }
         return result;
     }
@@ -412,7 +413,7 @@ public class BookDAO implements IBookDAO {
         connect();
 
         try {
-            st = c.prepareStatement("SELECT NAME FROM LIBRARY");
+            st = connection.prepareStatement("SELECT NAME FROM LIBRARY");
             ResultSet rs = st.executeQuery();
 
             while (rs.next()) {
@@ -423,7 +424,7 @@ public class BookDAO implements IBookDAO {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            c.close();
+            connection.close();
         }
         return result;
     }
@@ -435,7 +436,7 @@ public class BookDAO implements IBookDAO {
         connect();
 
         try {
-            st = c.prepareStatement("SELECT PRICE FROM LIBRARY");
+            st = connection.prepareStatement("SELECT PRICE FROM LIBRARY");
             ResultSet rs = st.executeQuery();
 
             while (rs.next()) {
@@ -446,7 +447,7 @@ public class BookDAO implements IBookDAO {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            c.close();
+            connection.close();
         }
         return result;
     }
@@ -458,7 +459,7 @@ public class BookDAO implements IBookDAO {
         connect();
 
         try {
-            st = c.prepareStatement("SELECT STOCK FROM LIBRARY");
+            st = connection.prepareStatement("SELECT STOCK FROM LIBRARY");
             ResultSet rs = st.executeQuery();
 
             while (rs.next()) {
@@ -469,7 +470,7 @@ public class BookDAO implements IBookDAO {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            c.close();
+            connection.close();
         }
         return result;
     }

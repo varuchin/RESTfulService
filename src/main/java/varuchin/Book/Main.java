@@ -15,6 +15,7 @@ import java.util.Locale;
 
 //переименовать package в app
 public class Main {
+
     // Base URI the Grizzly HTTP server will listen on
     public static final String BASE_URI = "http://localhost:8081";
     public static final String driver = "oracle.jdbc.driver.OracleDriver";
@@ -57,6 +58,15 @@ public class Main {
         System.in.read();
         server.stop();
     }
+    /**
+     * есть два потока и один принтер(печатает строки)
+     * 1 поток говорит печатать(передает строку)  — второй её печатает как только она появляется
+     * в объекте (интервала секунда)
+     * через блоки synchronized
+     *
+     * поиск min в массиве через fork/join (на входе несортирвоанный массив и fork/join pool
+     * за минимальнео время в многопоточной среде обраотать)
+     */
 }
 
 

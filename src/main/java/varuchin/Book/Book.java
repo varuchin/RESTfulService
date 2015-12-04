@@ -15,16 +15,6 @@ public class Book {
     }
 
 
-    @Override
-    public String toString() {
-        return "Book{" +
-                ", name='" + name + '\'' +
-                ", author='" + author + '\'' +
-                ", price='" + price + '\'' +
-                ", stock='" + stock + '\'' +
-                '}';
-    }
-
     public Book(String name, String author, String price, String stock) {
         this.name = name;
         this.author = author;
@@ -71,6 +61,18 @@ public class Book {
     public void setStock(String stock) {
         this.stock = stock;
     }
+
+
+    @Override
+    public String toString() {
+        return "Book{" +
+                ", name='" + name + '\'' +
+                ", author='" + author + '\'' +
+                ", price='" + price + '\'' +
+                ", stock='" + stock + '\'' +
+                '}';
+    }
+
 
     @Override
     public boolean equals(Object o) {
